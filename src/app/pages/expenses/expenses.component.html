@@ -1,0 +1,123 @@
+<div class="container mt-5">
+    <div class="row">
+        <!-- Total Expense Header -->
+        <div class="col-12 mb-4">
+            <h3 class="text-center bg-light py-3 rounded shadow-sm">Total Expenses</h3>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Post New Expense -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white text-center">
+                    <h4>Post New Expense</h4>
+                </div>
+                <div class="card-body">
+                    @if (errorObjArr().length>0) {
+                        <ul class="error-message">
+                            @for (item of errorObjArr(); track $index) {
+                            <li (click)="focusInput(item)" class="error" tabindex="0">{{errorObj[item]}}</li>
+                            }
+                        </ul>
+                        }
+                    <form [formGroup]="expenseForm" (submit)="handleSubmit($event)">
+                        <div class="form-group mb-3">
+                            <label for="expense-title" class="form-label">Title</label>
+                            <input type="text" class="form-control rounded" id="expense-title" placeholder="Enter Title" formControlName="title" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="expense-amount" class="form-label">Amount</label>
+                            <input type="text" class="form-control rounded" id="expense-amount" placeholder="Enter Amount" formControlName="amount"/>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="expense-date" class="form-label">Date</label>
+                            <input type="date" class="form-control rounded" id="expense-date" formControlName="date" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="expense-description" class="form-label">Description</label>
+                            <textarea class="form-control rounded" id="expense-description" placeholder="Enter description" formControlName="description"></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="expense-category" class="form-label" >Category</label>
+                            <select class="form-control rounded" id="expense-category" formControlName="category">
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Food">Food</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Health">Health</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Past Expenses -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h4>Past Expenses</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover text-center">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Title</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th colspan="2">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for(data of expenseData;track $index){
+                                <tr>
+                                    <td>{{data.title}}</td>
+                                    <td>{{data.amount}}</td>
+                                    <td>{{data.date}}</td>
+                                    <td>{{data.description}}</td>
+                                    <td>{{data.category}}</td>
+                                    <td>
+                                        <button (click)="handleEdit(data.id)"  class="btn btn-sm btn-warning">Edit</button>
+                                    </td>
+                                    <td>
+                                        <button (click)="handleDelete(data.id)"  class="btn btn-sm btn-danger" >Delete</button>
+                                    </td>
+                                </tr>
+                            }@empty {
+                                <tr>
+                                    <td colspan="7" class="text-center">No Expenses Found</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+         <!-- delete confirm modal -->
+         @if(confirmModalOpen){
+            <div class="modal" [class]="confirmModalOpen ? '' : 'fade' " tabindex="-1" aria-labelledby="successModalLabel"
+              aria-hidden="true"
+              style="display: flex;background: rgba(0, 0, 0, 0.5);align-items: center; justify-content: center;">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Conformation</h5>
+                  </div>
+                  <div class="modal-body">
+                    <p>Are you sure you want to Delet this expense details?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                      (click)="handleCloseConfirm()">No</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="handleShowModal()">Yes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            }
+    </div>
+</div>

@@ -1,1 +1,65 @@
 /* You can add global styles to this file, and also import other style files */
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import 'ngx-toastr/toastr';
+.gradient-form {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  .gradient{
+    padding: 30px;
+    background: linear-gradient(to right, #9191a0, #8d9396);
+  }
+  
+  
+  .img {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .nav-link {
+    color: rgba(255, 255, 255, 0.8); /* Dim white for inactive links */
+    text-decoration: none;
+    transition: color 0.3s; /* Smooth transition */
+}
+.nav-link:hover {
+    color: #eef2f3; /* Optional hover effect */
+}
+
+
+  .nav-link.text-primary {
+    font-weight: bold;
+    color: #f8f8f8; /* Blue color for active links */
+}
+
+.error-message {
+    margin-bottom: 1rem;
+    list-style: none;
+    padding: 0;
+    }
+    .error {
+    color: red;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.875rem;
+    }
+    
+    .error:focus {
+    outline: 2px solid blue; /* or any color of your choice */
+    outline-offset: 2px; /* to create some space between the outline and element */
+    }
+
+    .router-container {
+        flex: 1;
+        padding: 20px; /* Optional: Add padding */
+        background-color: #f9f9f9; /* Optional: Background for better design */
+      }
+      

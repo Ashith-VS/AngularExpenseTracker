@@ -1,0 +1,21 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-secondary" style="width: 280px;height: 90vh; min-height: 100%; ">
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a routerLink="/home" class="nav-link active text-white " aria-current="page" routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }">
+                Home
+            </a>
+        </li>
+        <li>
+            <a routerLink="/income" class="nav-link active text-white" routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }">
+                Incomes
+            </a>
+        </li>
+        <li>
+            <a routerLink="/expense" class="nav-link active text-white" routerLinkActive="active">
+                Expenses
+            </a>
+        </li>
+    </ul>
+</div>

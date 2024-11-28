@@ -1,0 +1,77 @@
+<div class="center-container">
+    <div class="reg-container">
+        <h1>Register</h1>
+
+        @if (errorObjArr().length>0) {
+        <ul class="error-message">
+            @for (item of errorObjArr(); track $index) {
+            <li (click)="focusInput(item)" class="error" tabindex="0">
+                {{errorObj[item]}}</li>
+            }
+        </ul>
+        }
+
+        <form [formGroup]="registerForm" (submit)="handleSubmit($event)">
+            @for(item of JsonInput; track $index){
+            @switch(item.type){
+            @case ("text") {
+            <div class="form-group">
+                <label [for]="item.id">{{item.label}}</label>
+                <input type="text" [formControlName]="item.name" [id]="item.id" class="form-control" />
+            </div>
+            }
+            @case ("password") {
+            <div class="form-group">
+                <label [for]="item.id">{{item.label}}</label>
+                <input type="password" [formControlName]="item.name" [id]="item.id" class="form-control" />
+                <!-- Validation Note -->
+                <small class="form-text text-muted">
+                    Password must be at least 8 characters long, contain at least one uppercase letter, and
+                    include one
+                    special character.
+                </small>
+            </div>
+            }
+            @case('file'){
+            <div class="avatar-upload">
+                <label [for]="item.id" class="avatar-label">
+                    <img [src]="avatar || defaultAvatarIcon" alt="Upload Avatar" class="avatar-image" />
+                    <span class="upload-text">Upload an Image</span>
+                </label>
+                <input type="file" [id]="item.id" accept="image/*" (change)="handleAvatar($event)" hidden />
+            </div>
+            }
+            }
+            }
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+        <p>
+            Already have an account?
+            <a routerLink="/login">Login</a>
+        </p>
+    </div>
+
+    <!-- modal registration success -->
+    @if (showModal) {
+    <div class="modal " [class]="showModal ? '' : 'fade' " tabindex="-1" aria-labelledby="successModalLabel"
+        aria-hidden="true"
+        style="display: flex;background: rgba(0, 0, 0, 0.5);align-items: center; justify-content: center;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Registration Successful</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="handleNavigate('login')"></button>
+                </div>
+                <div class="modal-body">
+                    Your account has been successfully created!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                        (click)="handleNavigate('login')">ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>

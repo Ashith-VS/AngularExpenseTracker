@@ -1,0 +1,26 @@
+<div class="center-container ">
+    <div class="login-container">
+        <h1>Login</h1>
+        @if (errorObjArr().length>0) {
+        <ul class="error-message">
+            @for (item of errorObjArr(); track $index) {
+            <li (click)="focusInput(item)" class="error" tabindex="0">{{errorObj[item]}}</li>
+            }
+        </ul>
+        }
+
+        <form [formGroup]="loginForm" (submit)="handleSubmit($event)">
+            @for(item of JsonInput; track $index) {
+                <div class="form-group">
+                    <label [for]="item.id">{{item.label}}</label>
+                    <input [type]="item.type" [formControlName]="item.name" [id]="item.id" class="form-control" [placeholder]="item.placeholder" />
+                </div>
+            }
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p>
+            Don't have an account?
+            <a routerLink="/register">Register</a>
+        </p>
+    </div>
+</div>

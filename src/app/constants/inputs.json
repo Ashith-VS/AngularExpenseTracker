@@ -1,0 +1,61 @@
+{
+    "login":[
+        {
+          "id": "email",
+          "label": "Email",
+          "type": "text",
+          "name": "email",
+          "placeholder": "enter your email",
+          "isrequired": true,
+          "ispattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+          "patternErrorMessage": "Please enter a valid email address"
+        },
+        {
+          "id": "password",
+          "label": "Password",
+          "type": "password",
+          "name": "password",
+          "placeholder": "enter your password",
+          "isrequired": true
+        }
+      ],
+      "Registers": [
+        {
+            "id": "avatar",
+            "label": "Profile Picture",
+            "name": "avatar",
+            "type": "file",
+            "accept": "image/*",
+            "isrequired": false,
+            "patternErrorMessage": "Please upload a valid image file."
+          },
+        {
+            "id": "name",
+            "label": "User Name",
+            "name": "name",
+            "type": "text",
+            "placeholder": "name",
+            "isrequired": true
+          },
+          {
+            "id": "email",
+            "label": "Email",
+            "name": "email",
+            "type": "text",
+            "placeholder": "email",
+            "isrequired": true,
+            "ispattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+          },
+          {
+            "id": "password",
+            "label": "Password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "password",
+            "isrequired": true,
+            "ispattern": "^(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+            "patternErrorMessage":"Password must be at least 8 characters long, with at least one uppercase letter and one special character."
+         }
+      ]
+      
+}
