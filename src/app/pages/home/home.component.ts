@@ -1,7 +1,9 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ExpenseServicesService } from '../../service/apiService/expense-services.service';
 import { IncomeModel } from '../../models/income.model';
 import { Chart, registerables} from 'chart.js';
+import { userModel } from '../../models/auth.model';
+import { selectCurrentUser } from '../../redux/authentication.selector';
+import { Store } from '@ngrx/store';
 Chart.register(...registerables)
 
 @Component({
@@ -19,29 +21,25 @@ export class HomeComponent implements OnInit {
   totalBalance: number = 0;
   incomeData:IncomeModel[]=[]
   expenseData:IncomeModel[]=[]
+  currentUser:userModel=new Object() as userModel
 
   selectedTimePeriod: string = 'yearly';
   chartInstance:any = null;
   
-  constructor(private homeService:ExpenseServicesService) { }
+  constructor(private store:Store) { }
 
   ngOnInit(): void {
-    this.homeService.getExpenses().subscribe((data:any) => {
-    this.expenseData=data
-    console.log('this.expenseData: ', this.expenseData.map((item)=>item));
-    this.calculateTotals();
-    this.checkAndRenderChart();
-    });
-    this.homeService.getIncomes().subscribe((data:any) => {
-      this.incomeData=data
-      console.log('this.incomeData: ', this.incomeData.map((item)=>item));
-      this.calculateTotals();
-      this.checkAndRenderChart();
-    });
+    this.store.select(selectCurrentUser).subscribe(user => {
+      this.currentUser = user;
+        this.incomeData = this.currentUser.Incomedetails as IncomeModel[]
+        this.expenseData = this.currentUser.expensedetails as IncomeModel[]
+        this.calculateTotals();
+        this.checkAndRenderChart();
+    })
   }
 
   checkAndRenderChart(): void {
-    if (this.incomeData.length > 0 && this.expenseData.length > 0) {
+    if (this.incomeData?.length > 0 && this.expenseData?.length > 0) {
       this.initializeChart();
     }
   }
@@ -75,18 +73,143 @@ export class HomeComponent implements OnInit {
 
   updatePieChart() {
     if (this.chartInstance) {
+      // Initialize filtered data
+      let filteredData: { [category: string]: number } = {
+        Rent: 0,
+        Salary: 0,
+        Groceries: 0,
+        Transport: 0,
+        Entertainment: 0,
+        Food: 0,
+        Health: 0,
+        Other: 0
+      };
+  
+      // Filter data based on the selected time period
+      if (this.selectedTimePeriod === 'weekly') {
+        // Example: Filter for weekly data
+        const startOfWeek = this.getStartOfWeek(new Date());
+        const endOfWeek = this.getEndOfWeek(new Date());
+        this.incomeData.forEach(income => {
+          const date = new Date(income.date)
+         
+          if (date >= startOfWeek && date <= endOfWeek) {
+            const category = income.category;
+            const amount = parseFloat(income.amount);
+            if (category && !isNaN(amount)) {
+              filteredData[category] = (filteredData[category] || 0) + amount;
+            }
+          }
+        });
       
-
-      // const data = this.getDataByTimePeriod();
-      // console.log('Updating chart with data:', data);
-      // this.chartInstance.data.datasets[0].data = [data.income, data.expenses];
+  
+        // this.expenseData.forEach(expense => {
+        //   const date = new Date(expense.date);
+        //   if (date >= startOfWeek && date <= endOfWeek) {
+        //     const category = expense.category;
+        //     const amount = parseFloat(expense.amount);
+        //     if (category && !isNaN(amount)) {
+        //       filteredData[category] = (filteredData[category] || 0) - amount;
+        //     }
+        //   }
+        // });
+      } else if (this.selectedTimePeriod === 'monthly') {
+        const currentMonth = new Date().getMonth();
+        this.incomeData.forEach(income => {
+          console.log(' this.incomeData: ',  this.incomeData);
+          const date = new Date(income.date);
+          if (date.getMonth() === currentMonth) {
+            const category = income.category;
+            const amount = parseFloat(income.amount);
+            if (category && !isNaN(amount)) {
+              filteredData[category] = (filteredData[category] || 0) + amount;
+            }
+          }
+        });
+  
+        // this.expenseData.forEach(expense => {
+        //   const date = new Date(expense.date);
+        //   if (date.getMonth() === currentMonth) {
+        //     const category = expense.category;
+        //     const amount = parseFloat(expense.amount);
+        //     if (category && !isNaN(amount)) {
+        //       filteredData[category] = (filteredData[category] || 0) - amount;
+        //     }
+        //   }
+        // });
+      } else if (this.selectedTimePeriod === 'yearly') {
+        const currentYear = new Date().getFullYear();
+        this.incomeData.forEach(income => {
+          const date = new Date(income.date);
+          if (date.getFullYear() === currentYear) {
+            const category = income.category;
+            const amount = parseFloat(income.amount);
+            if (category && !isNaN(amount)) {
+              filteredData[category] = (filteredData[category] || 0) + amount;
+            }
+          }
+        });
+  
+        this.expenseData.forEach(expense => {
+          const date = new Date(expense.date);
+          if (date.getFullYear() === currentYear) {
+            const category = expense.category;
+            const amount = parseFloat(expense.amount);
+            if (category && !isNaN(amount)) {
+              filteredData[category] = (filteredData[category] || 0) - amount;
+            }
+          }
+        });
+      }
+  
+      // Update the chart's data
+      this.chartInstance.data.datasets[0].data = [
+        filteredData['Rent'],
+        filteredData['Salary'],
+        filteredData['Groceries'],
+        filteredData['Transport'],
+        filteredData['Entertainment'],
+        filteredData['Food'],
+        filteredData['Health'],
+        filteredData['Other']
+      ];
+      this.chartInstance.data.labels = Object.keys(filteredData).filter(category => filteredData[category]!== 0);
+      this.chartInstance.data.datasets[0].backgroundColor = [
+        'rgba(255, 99, 132, 0.6)',  // Rent
+        'rgba(54, 162, 235, 0.6)',  // Salary
+        'rgba(255, 159, 64, 0.6)',  // Groceries
+        'rgba(75, 192, 192, 0.6)',  // Transport
+        'rgba(153, 102, 255, 0.6)', // Entertainment
+        'rgba(255, 205, 86, 0.6)',  // Food
+        'rgba(201, 203, 207, 0.6)', // Health
+        'rgba(255, 159, 132, 0.6)'  // Other
+      ];
+      // Re-render the chart
       this.chartInstance.update();
     }
   }
 
-
+  getStartOfWeek(date: Date): Date {
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Monday start
+    const startOfWeek = new Date(date.setDate(diff));
+    startOfWeek.setHours(0, 0, 0, 0); // Set time to midnight
+    return startOfWeek;
+  }
+  
+  getEndOfWeek(date: Date): Date {
+    const startOfWeek = this.getStartOfWeek(date);
+    const endOfWeek = new Date(startOfWeek.setDate(startOfWeek.getDate() + 6));
+    endOfWeek.setHours(23, 59, 59, 999); // Set time to end of the day (23:59:59.999)
+    return endOfWeek;
+  }
+  
+  
   initializeChart() {
     if(!this.barchart) return;
+    if (this.chartInstance) {
+      this.chartInstance.destroy(); // Destroy the existing chart instance
+    }
     const categoryTotals: any = {
       Rent: 0,
       Salary: 0,
@@ -125,8 +248,8 @@ export class HomeComponent implements OnInit {
     categoryTotals.Other
   ];
     
-    const data={
-      labels: ['Rent', 'Salary','Groceries','Transport','Entertainment','Food','Health','Other'],
+    const data={ 
+      labels: Object.keys(categoryTotals).filter(category => categoryTotals[category]!== 0),
       datasets: [
         {
           data: dataValues, 
@@ -188,6 +311,7 @@ export class HomeComponent implements OnInit {
     return currentWeekData.reduce((acc: { [week: string]: number }, curr) => {
       const week = `Week ${currentWeekNumber}`;  // Group all data under the current week number
       acc[week] = (acc[week] || 0) + parseFloat(curr.amount) || 0;
+      console.log('acc: ', acc);
       return acc;
     }, {});
   }
@@ -217,14 +341,14 @@ export class HomeComponent implements OnInit {
     const currentYear = currentDate.getFullYear();  // Get current year
   
     // Filter data to include only items from this year
-    const thisYearData = data.filter(item => {
+    const thisYearData = data?.filter(item => {
       const itemDate = new Date(item.date);
       // console.log('thisYearData: ', thisYearData);/
       return itemDate.getFullYear() === currentYear;
     });
   
     // Sum the amounts for this year
-    const totalAmountThisYear = thisYearData.reduce((acc, curr) => {
+    const totalAmountThisYear = thisYearData?.reduce((acc, curr) => {
       return acc + (parseFloat(curr.amount) || 0); // Sum the amounts, ensure valid number
     }, 0);
     // console.log('totalAmountThisYear: ', totalAmountThisYear);
@@ -232,26 +356,6 @@ export class HomeComponent implements OnInit {
     return totalAmountThisYear; // Returns total amount for the current year
   }
   
-
-  getDataByTimePeriod(): { income: number; expenses: number } {
-    if (this.selectedTimePeriod === 'weekly') {
-      const incomeByWeek = this.groupByWeek(this.incomeData);
-      const expenseByWeek = this.groupByWeek(this.expenseData);
-      const totalIncome = Object.values(incomeByWeek).reduce((acc, val) => acc + val, 0);
-      const totalExpenses = Object.values(expenseByWeek).reduce((acc, val) => acc + val, 0);
-      return { income: totalIncome, expenses: totalExpenses };
-    } else if (this.selectedTimePeriod === 'monthly') {
-      const incomeByMonth = this.groupByMonth(this.incomeData|| 0);
-      const expenseByMonth = this.groupByMonth(this.expenseData|| 0 );
-
-      return { income: incomeByMonth, expenses: expenseByMonth };
-    } else {
-      console.log("yearly");
-      const incomeByYear = this.groupByYear(this.incomeData );
-      const expenseByYear = this.groupByYear(this.expenseData );
-      return { income: incomeByYear, expenses: expenseByYear };
-    }
-  }
 
   
   

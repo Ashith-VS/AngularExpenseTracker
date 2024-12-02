@@ -4,6 +4,11 @@ import { IncomeModel } from '../../models/income.model';
 import { ExpenseServicesService } from '../../service/apiService/expense-services.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
+import { selectCurrentUser } from '../../redux/authentication.selector';
+import { Store } from '@ngrx/store';
+import { userModel } from '../../models/auth.model';
+import { isEmpty } from 'lodash';
+import * as XLSX from 'xlsx'
 
 @Component({
   selector: 'app-expenses',
@@ -17,12 +22,14 @@ export class ExpensesComponent {
   errorObj: { [key: string]: string } = {};
   uid:string = Date.now().toString()
   id: string | null = null;
-  expenseData:IncomeModel[]=[]
+  expenseData:IncomeModel[] =[]
   confirmModalOpen:boolean = false
   selectedId: string | null = null;
+  currentUser:userModel=new Object() as userModel
+  loginModalOpen:boolean = false
 
 
-  constructor(private fb:FormBuilder, private expenseService:ExpenseServicesService,private toast:ToastrService,private route:ActivatedRoute,private router:Router) {
+  constructor(private fb:FormBuilder, private expenseService:ExpenseServicesService,private toast:ToastrService,private route:ActivatedRoute,private router:Router,private store:Store) {
     this.expenseForm=this.fb.group({
       title:["",Validators.required],
       amount:["",[Validators.required,Validators.pattern('^[0-9]+$')]],
@@ -39,11 +46,24 @@ export class ExpensesComponent {
     
     this.handleChangesClearErrors()
     this.getAllIncomeData()
+
+    this.store.select(selectCurrentUser).subscribe(user => {
+      this.currentUser = user;
+      this.expenseData = this.currentUser.expensedetails as IncomeModel[];
+      console.log('this.currentUser : ', this.currentUser );
+    })
   }
 
   getAllIncomeData(){
     this.expenseService.getExpenses().subscribe((data:any)=>{
-      this.expenseData=data;
+      this.store.select(selectCurrentUser).subscribe(user => {
+        this.currentUser = user;
+        this.expenseData = this.currentUser.expensedetails as IncomeModel[];
+        console.log('this.currentUser : ', this.currentUser );
+      })
+      // this.expenseData=data;
+      // this.expenseData=this.currentUser?.Incomedetails||[]
+      // console.log(' this.expenseData: ',  this.expenseData);
       if (this.id) {
         this.patchFormForEdit(this.id);
       }
@@ -72,6 +92,10 @@ export class ExpensesComponent {
   }
 
   handleDelete(data:string){
+    if(isEmpty(this.currentUser)){
+      this.loginModalOpen=true;
+      return;
+    }
     this.selectedId=data;
     this.confirmModalOpen=true;
   }
@@ -102,6 +126,10 @@ export class ExpensesComponent {
 
   handleSubmit(e:Event){
     e.preventDefault();
+    if(isEmpty(this.currentUser)){
+      this.loginModalOpen=true;
+      return;
+    }
     this.errorObj={}
     this.handleValidate()
     if(this.expenseForm.valid){
@@ -113,12 +141,21 @@ export class ExpensesComponent {
           this.expenseForm.reset();
           this.toast.success('Expenses updated successfully');
           this.getAllIncomeData()
+          const expenseData = {...income,id:this.id}
+          this.expenseService.updateUserDocsByIdReplace(this.currentUser.id,expenseData).subscribe(()=>{
+            console.log("Expenses updated successfully");
+          });
         })
       }else{
-        this.expenseService.createExpenses(income,this.uid).subscribe(()=>{
+        this.expenseService.createExpenses(income,this.uid).subscribe((uid)=>{
+          console.log('uid: ', uid);
           this.expenseForm.reset();
           this.toast.success('Expenses added successfully');
           this.getAllIncomeData()
+          const expenseData = {...income,id:this.uid}
+          this.expenseService.updateUserExpenseDocById(this.currentUser.id,expenseData).subscribe(()=>{
+            console.log("Expenses create  to db successfully");
+          });
         })
       }
     }else {
@@ -154,7 +191,86 @@ export class ExpensesComponent {
     }
   }
 
+  handleNavigate(data:string){
+    this.router.navigateByUrl(data)
+      }
 
+// download full table
+      // handleExportExcel(){
+      //   const filename ='ExcelSheet.xlsx';
+      //  // passing table id
+      //   let data =document.getElementById('table-data')
+      //   const worksheet:XLSX.WorkSheet = XLSX.utils.table_to_sheet(data);
+      //   // generate workbook  and add the worksheet
+      //   const workbook: XLSX.WorkBook =XLSX.utils.book_new();
+      //   XLSX.utils.book_append_sheet(workbook,worksheet,'Sheet1')
+      //   // save to file
+      //   XLSX.writeFile(workbook, filename);
+      // }
 
+        // remove action from table and download
+        handleExportExcel() {
+          const filename = 'ExcelSheet.xlsx';
+          
+          // Get the table element
+          const table = document.getElementById('table-data');
+          
+          // Check if the table exists before proceeding
+          if (!table) {
+            console.error('Table element not found');
+            return; // Exit if the table is not found
+          }
+        
+          // Clone the table to avoid modifying the original table structure
+          const tableClone = table.cloneNode(true) as HTMLElement;
+        
+          // Get all header cells
+          const headerCells = tableClone.querySelectorAll('thead th');
+          // console.log('Header Cells:', headerCells);
+        
+          // Define action column indices
+          const actionColumnIndices = [5, 6]; // Action columns (Edit and Delete)
+        
+          // Remove action columns in the header
+          actionColumnIndices.forEach(index => {
+            const headerCell = headerCells[index];
+            if (headerCell) {
+              console.log(`Removing header cell at index ${index}`);
+              headerCell.remove();
+            } else {
+              console.warn(`Header cell at index ${index} not found`);
+            }
+          });
+        
+          // Get all rows in the table body
+          const rows = tableClone.querySelectorAll('tbody tr');
+          console.log('Rows:', rows);
+        
+          // Remove action columns in the rows
+          rows.forEach((row, rowIndex) => {
+            const cells = row.querySelectorAll('td');
+            console.log(`Row ${rowIndex} Cells:`, cells);
+        
+            actionColumnIndices.reverse().forEach(index => {
+              const cell = cells[index];
+              if (cell) {
+                console.log(`Removing data cell at index ${index} in row ${rowIndex}`);
+                cell.remove();
+              } else {
+                console.warn(`Data cell at index ${index} not found in row ${rowIndex}`);
+              }
+            });
+          });
+        
+          // Convert the modified table to a worksheet
+          const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(tableClone);
+        
+          // Generate the workbook and add the worksheet
+          const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+        
+          // Save the file
+          XLSX.writeFile(workbook, filename);
+        }
 
 }

@@ -4,6 +4,7 @@ import { IncomesComponent } from './pages/incomes/incomes.component';
 import { ExpensesComponent } from './pages/expenses/expenses.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegistrationComponent } from './pages/registration/registration.component';
+import { guardGuard } from './Guard/guard.guard';
 
 export const routes: Routes = [
     {path:'',redirectTo:'home',pathMatch:'full'},

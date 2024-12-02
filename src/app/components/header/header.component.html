@@ -23,6 +23,7 @@
                             @if(isCurrentUserEmpty()) {
                             <li><a class="dropdown-item" routerLink="/login">login</a></li>
                             }@else{
+                            <li><a class="dropdown-item" (click)="handleProfile()">Profile</a></li>
                             <li><a class="dropdown-item" (click)="handleLogout()">Sign out</a></li>
                             }
                         </ul>
@@ -31,4 +32,77 @@
             </div>
         </div>
     </div>
+
+    <!-- profile modal -->
+    @if (isProfileModalVisible) {
+    <div class="modal" tabindex="-1" role="dialog" [class]="(isProfileModalVisible ? '' : 'fade') "
+        [style.display]="isProfileModalVisible ? 'block' : 'none'" style="background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Profile</h5>
+                    <button type="button" class="btn-close" (click)="closeProfileModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <!-- Avatar Image / Upload Option -->
+                        @if (editing) {
+                        <label for="file">
+                            <img [src]="currentUser.avatar" alt="Upload Avatar" class="avatar-image" />
+                            <span class="upload-text">Upload an Image</span>
+                        </label>
+                        <input type="file" id="file" accept="image/*" (change)="handleAvatar($event)" hidden />
+                        }@else {
+                        <img [src]="currentUser.avatar?currentUser.avatar:'./assets/icons/avatar.webp'"
+                            alt="Profile Avatar" class="avatar-image" style="width: 100px; height: 100px;" />
+                        }
+                    </div>
+                    <!-- Profile Information -->
+                    <h5 class="text-center">{{ currentUser.name }}</h5>
+                    <p class="text-muted text-center">{{ currentUser.email }}</p>
+
+                    <!-- Editable Form -->
+                    <!-- @if (editing) {
+                        <div>
+                            <form (ngSubmit)="handleUpdateProfile()">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" [(ngModel)]="currentUser.username"
+                                        name="name" placeholder="Enter your name" />
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" [(ngModel)]="currentUser.email" name="email"
+                                        placeholder="Enter your email" />
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" [(ngModel)]="currentUser.about"
+                                        name="status" placeholder="Enter your status" />
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                            </form>
+                        </div>
+                        } -->
+                    <!-- delete my account link -->
+                    <!-- <a (click)="handleDeleteAccount()" style="cursor: pointer;">Delete My Account</a> -->
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <!-- <button type="button" class="btn btn-primary" (click)="handleChangePasswordToggle()">Change
+                            password</button> -->
+                    <div class="d-flex gap-2">
+<!-- @if(!editing){
+
+    <button  type="button" class="btn btn-secondary"
+            (click)="startEditing()">Edit
+            Profile</button>
+}@else{
+    <button type="button" class="btn btn-secondary"
+        (click)="cancelEditing()">cancel Editing</button>
+} -->
+                    </div>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
 </header>

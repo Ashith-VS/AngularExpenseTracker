@@ -1,3 +1,5 @@
+import { IncomeModel } from "./income.model";
+
 export interface AuthModel {
     id: string;
     label: string;
@@ -15,5 +17,12 @@ export interface AuthModel {
     id: string;
     role: string;
     avatar?: string|null;
-    ticketsBooked?:any[]
+    Incomedetails?:IncomeModel[];
+    expensedetails?:IncomeModel[];
   }
+
+  
+  
+
+  
+  

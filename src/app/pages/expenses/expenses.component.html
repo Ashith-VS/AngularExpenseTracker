@@ -14,20 +14,22 @@
                 </div>
                 <div class="card-body">
                     @if (errorObjArr().length>0) {
-                        <ul class="error-message">
-                            @for (item of errorObjArr(); track $index) {
-                            <li (click)="focusInput(item)" class="error" tabindex="0">{{errorObj[item]}}</li>
-                            }
-                        </ul>
+                    <ul class="error-message">
+                        @for (item of errorObjArr(); track $index) {
+                        <li (click)="focusInput(item)" class="error" tabindex="0">{{errorObj[item]}}</li>
                         }
+                    </ul>
+                    }
                     <form [formGroup]="expenseForm" (submit)="handleSubmit($event)">
                         <div class="form-group mb-3">
                             <label for="expense-title" class="form-label">Title</label>
-                            <input type="text" class="form-control rounded" id="expense-title" placeholder="Enter Title" formControlName="title" />
+                            <input type="text" class="form-control rounded" id="expense-title" placeholder="Enter Title"
+                                formControlName="title" />
                         </div>
                         <div class="form-group mb-3">
                             <label for="expense-amount" class="form-label">Amount</label>
-                            <input type="text" class="form-control rounded" id="expense-amount" placeholder="Enter Amount" formControlName="amount"/>
+                            <input type="text" class="form-control rounded" id="expense-amount"
+                                placeholder="Enter Amount" formControlName="amount" />
                         </div>
                         <div class="form-group mb-3">
                             <label for="expense-date" class="form-label">Date</label>
@@ -35,10 +37,11 @@
                         </div>
                         <div class="form-group mb-3">
                             <label for="expense-description" class="form-label">Description</label>
-                            <textarea class="form-control rounded" id="expense-description" placeholder="Enter description" formControlName="description"></textarea>
+                            <textarea class="form-control rounded" id="expense-description"
+                                placeholder="Enter description" formControlName="description"></textarea>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="expense-category" class="form-label" >Category</label>
+                            <label for="expense-category" class="form-label">Category</label>
                             <select class="form-control rounded" id="expense-category" formControlName="category">
                                 <option value="" disabled selected>Select Category</option>
                                 <option value="Food">Food</option>
@@ -57,11 +60,12 @@
         <!-- Past Expenses -->
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark text-center">
+                <div class="card-header bg-warning text-dark text-center d-flex justify-content-between align-items-center">
                     <h4>Past Expenses</h4>
+                    <button (click)="handleExportExcel()" [disabled]="!expenseData || expenseData.length === 0"><img src="./assets/icons/excel.png" alt="" class="img"></button>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-hover text-center">
+                    <table class="table table-bordered table-hover text-center" id="table-data">
                         <thead class="table-secondary">
                             <tr>
                                 <th>Title</th>
@@ -74,50 +78,72 @@
                         </thead>
                         <tbody>
                             @for(data of expenseData;track $index){
-                                <tr>
-                                    <td>{{data.title}}</td>
-                                    <td>{{data.amount}}</td>
-                                    <td>{{data.date}}</td>
-                                    <td>{{data.description}}</td>
-                                    <td>{{data.category}}</td>
-                                    <td>
-                                        <button (click)="handleEdit(data.id)"  class="btn btn-sm btn-warning">Edit</button>
-                                    </td>
-                                    <td>
-                                        <button (click)="handleDelete(data.id)"  class="btn btn-sm btn-danger" >Delete</button>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>{{data.title}}</td>
+                                <td>{{data.amount}}</td>
+                                <td>{{data.date}}</td>
+                                <td>{{data.description}}</td>
+                                <td>{{data.category}}</td>
+                                <td>
+                                    <button (click)="handleEdit(data.id)" class="btn btn-sm btn-warning">Edit</button>
+                                </td>
+                                <td>
+                                    <button (click)="handleDelete(data.id)"
+                                        class="btn btn-sm btn-danger">Delete</button>
+                                </td>
+                            </tr>
                             }@empty {
-                                <tr>
-                                    <td colspan="7" class="text-center">No Expenses Found</td>
-                                </tr>
+                            <tr>
+                                <td colspan="7" class="text-center">No Expenses Found</td>
+                            </tr>
                             }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-         <!-- delete confirm modal -->
-         @if(confirmModalOpen){
-            <div class="modal" [class]="confirmModalOpen ? '' : 'fade' " tabindex="-1" aria-labelledby="successModalLabel"
-              aria-hidden="true"
-              style="display: flex;background: rgba(0, 0, 0, 0.5);align-items: center; justify-content: center;">
-              <div class="modal-dialog">
+        <!-- delete confirm modal -->
+        @if(confirmModalOpen){
+        <div class="modal" [class]="confirmModalOpen ? '' : 'fade' " tabindex="-1" aria-labelledby="successModalLabel"
+            aria-hidden="true"
+            style="display: flex;background: rgba(0, 0, 0, 0.5);align-items: center; justify-content: center;">
+            <div class="modal-dialog">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Conformation</h5>
-                  </div>
-                  <div class="modal-body">
-                    <p>Are you sure you want to Delet this expense details?</p>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
-                      (click)="handleCloseConfirm()">No</button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="handleShowModal()">Yes</button>
-                  </div>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel">Conformation</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to Delet this expense details?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                            (click)="handleCloseConfirm()">No</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                            (click)="handleShowModal()">Yes</button>
+                    </div>
                 </div>
-              </div>
             </div>
-            }
+        </div>
+        }
     </div>
+    @if(loginModalOpen){
+    <div class="modal" [class]="loginModalOpen ? '' : 'fade' " tabindex="-1" aria-labelledby="successModalLabel"
+        aria-hidden="true"
+        style="display: flex;background: rgba(0, 0, 0, 0.5);align-items: center; justify-content: center;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Login Required</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Please login to use.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                        (click)="handleNavigate('login')">ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
 </div>
