@@ -48,6 +48,11 @@
                     <option value="monthly">Monthly</option>
                     <option value="yearly" selected>Yearly</option>
                 </select>
+                <select class="form-select mt-2" (change)="handleSelectChart($event)" aria-label="Select chart type">
+                    <option value="pie" selected>Pie Chart</option>
+                    <option value="bar" >Bar Chart</option>
+                </select>
+                
                 <div class="card-body d-flex justify-content-center align-items-center" style="height: 600px;">
                     <canvas #barchart></canvas>
                 </div>

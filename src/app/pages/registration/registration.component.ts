@@ -62,7 +62,7 @@ export class RegistrationComponent {
       if(this.avatar){
         formObject['avatar']=this.avatar
       } 
-      console.log('formObject: ', formObject);
+      // console.log('formObject: ', formObject);
 this.auth.createUser(formObject).subscribe({
   next:()=>{
     this.showModal=true;
@@ -120,7 +120,6 @@ handleAvatar(e:Event):void{
     const reader = new FileReader();
     reader.onload = (e:any) => {
       this.avatar = e.target.result;
-      // console.log('this.avatar4: ', this.avatar);
     };
     reader.readAsDataURL(file);
   }

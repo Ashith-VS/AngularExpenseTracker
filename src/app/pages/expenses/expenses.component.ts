@@ -50,7 +50,7 @@ export class ExpensesComponent {
     this.store.select(selectCurrentUser).subscribe(user => {
       this.currentUser = user;
       this.expenseData = this.currentUser.expensedetails as IncomeModel[];
-      console.log('this.currentUser : ', this.currentUser );
+      // console.log('this.currentUser : ', this.currentUser );
     })
   }
 
@@ -59,7 +59,7 @@ export class ExpensesComponent {
       this.store.select(selectCurrentUser).subscribe(user => {
         this.currentUser = user;
         this.expenseData = this.currentUser.expensedetails as IncomeModel[];
-        console.log('this.currentUser : ', this.currentUser );
+        // console.log('this.currentUser : ', this.currentUser );
       })
       // this.expenseData=data;
       // this.expenseData=this.currentUser?.Incomedetails||[]
@@ -148,7 +148,7 @@ export class ExpensesComponent {
         })
       }else{
         this.expenseService.createExpenses(income,this.uid).subscribe((uid)=>{
-          console.log('uid: ', uid);
+          // console.log('uid: ', uid);
           this.expenseForm.reset();
           this.toast.success('Expenses added successfully');
           this.getAllIncomeData()
@@ -210,7 +210,8 @@ export class ExpensesComponent {
 
         // remove action from table and download
         handleExportExcel() {
-          const filename = 'ExcelSheet.xlsx';
+          const currentDate = new Date().toISOString().slice(0, 10); // Gets current date in YYYY-MM-DD format
+const filename = `ExpenseSheet_${currentDate}.xlsx`;
           
           // Get the table element
           const table = document.getElementById('table-data');
@@ -244,7 +245,7 @@ export class ExpensesComponent {
         
           // Get all rows in the table body
           const rows = tableClone.querySelectorAll('tbody tr');
-          console.log('Rows:', rows);
+          // console.log('Rows:', rows);
         
           // Remove action columns in the rows
           rows.forEach((row, rowIndex) => {

@@ -146,7 +146,7 @@ if (this.id) {
         })
       }else{
         this.incomeService.createIncomes(income,this.uid).subscribe((uid)=>{
-          console.log('uid: ', uid);
+          // console.log('uid: ', uid);
           this.incomeForm.reset();
           this.toast.success('Income added successfully');
           this.getAllIncomeData()
@@ -211,7 +211,8 @@ if (this.id) {
 
       // remove action from table
       handleExportExcel() {
-        const filename = 'ExcelSheet.xlsx';
+        const currentDate = new Date().toISOString().slice(0, 10); // Gets current date in YYYY-MM-DD format
+const filename = `IncomeSheet_${currentDate}.xlsx`;
         
         // Get the table element
         const table = document.getElementById('table-data');

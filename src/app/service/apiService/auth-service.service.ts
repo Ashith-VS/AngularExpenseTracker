@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Auth, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
-import { doc, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
+import { Auth, createUserWithEmailAndPassword, EmailAuthProvider, onAuthStateChanged, reauthenticateWithCredential, signInWithEmailAndPassword, signOut, updatePassword } from '@angular/fire/auth';
+import { doc, Firestore, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { from, map, Observable, switchMap } from 'rxjs';
 
 @Injectable({
@@ -8,9 +8,7 @@ import { from, map, Observable, switchMap } from 'rxjs';
 })
 export class AuthServiceService {
 
-  constructor(private auth : Auth, private firestore: Firestore,
-    // private store:Store
-  ) { }
+  constructor(private auth : Auth, private firestore: Firestore) { }
 
   LoginUser(data:any){
     const { email, password } = data;
@@ -36,6 +34,8 @@ export class AuthServiceService {
     })
   }
 
+
+
   currentUser(id: string){
     localStorage.setItem('currentUser',id)
     return from(getDoc(doc(this.firestore,'users',id))).pipe(map((snapshot)=>{
@@ -55,4 +55,32 @@ export class AuthServiceService {
     // this.store.dispatch(logoutAction())
     return from(signOut(this.auth));
   }
+
+
+  isUpdateUser(data:any,userId:string){
+    const userDocRef = doc(this.firestore, 'users', userId);
+    return from(updateDoc(userDocRef, { ...data }));
+  }
+
+
+  isChangePassword(data:any){
+    const { currentPassword, newPassword } = data;
+    return this.getcurrentUserId().pipe(switchMap((user:any)=>{
+      const credential =EmailAuthProvider.credential(user.email,currentPassword)
+      return from(reauthenticateWithCredential(user,credential)).pipe(switchMap(()=>{
+        return from(updatePassword(user,newPassword))
+        .pipe(
+          switchMap(()=>{
+            const userDocRef = doc(this.firestore, 'users', user.uid);
+            return from(updateDoc(userDocRef, { password: newPassword }));
+          })
+        )
+      }))
+    }))
+  }
+
+  
 }
+
+
+

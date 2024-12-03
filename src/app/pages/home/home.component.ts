@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { IncomeModel } from '../../models/income.model';
 import { Chart, registerables} from 'chart.js';
 import { userModel } from '../../models/auth.model';
@@ -13,7 +13,7 @@ Chart.register(...registerables)
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit,AfterViewInit {
 @ViewChild('barchart') barchart: ElementRef | undefined;
 
   totalIncome: number = 0;
@@ -24,9 +24,10 @@ export class HomeComponent implements OnInit {
   currentUser:userModel=new Object() as userModel
 
   selectedTimePeriod: string = 'yearly';
+  selectedChart:string="pie"
   chartInstance:any = null;
   
-  constructor(private store:Store) { }
+  constructor(private store:Store,private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.store.select(selectCurrentUser).subscribe(user => {
@@ -36,6 +37,10 @@ export class HomeComponent implements OnInit {
         this.calculateTotals();
         this.checkAndRenderChart();
     })
+  }
+
+  ngAfterViewInit(): void {
+    this.checkAndRenderChart();
   }
 
   checkAndRenderChart(): void {
@@ -70,6 +75,14 @@ export class HomeComponent implements OnInit {
     this.calculateTotals();
     this.updatePieChart(); 
   }
+  handleSelectChart(event: Event): void {
+    this.selectedChart = (event.target as HTMLSelectElement).value;
+    // console.log('this.selectedChart: ', this.selectedChart);
+    this.calculateTotals();
+    this.checkAndRenderChart();
+  }
+
+
 
   updatePieChart() {
     if (this.chartInstance) {
@@ -116,7 +129,7 @@ export class HomeComponent implements OnInit {
       } else if (this.selectedTimePeriod === 'monthly') {
         const currentMonth = new Date().getMonth();
         this.incomeData.forEach(income => {
-          console.log(' this.incomeData: ',  this.incomeData);
+          // console.log(' this.incomeData: ',  this.incomeData);
           const date = new Date(income.date);
           if (date.getMonth() === currentMonth) {
             const category = income.category;
@@ -221,13 +234,13 @@ export class HomeComponent implements OnInit {
       Other: 0
     };
       // Sum up the expense data per category
-  this.expenseData.forEach(expense => {
-    const category = expense.category;
-    const amount = parseFloat(expense.amount);
-    if (categoryTotals[category] !== undefined) {
-      categoryTotals[category] -= amount; // Expenses are subtracted
-    }
-  });
+  // this.expenseData.forEach(expense => {
+  //   const category = expense.category;
+  //   const amount = parseFloat(expense.amount);
+  //   if (categoryTotals[category] !== undefined) {
+  //     categoryTotals[category] -= amount; // Expenses are subtracted
+  //   }
+  // });
 
   // Sum up the income data per category
   this.incomeData.forEach(income => {
@@ -247,11 +260,13 @@ export class HomeComponent implements OnInit {
     categoryTotals.Health,
     categoryTotals.Other
   ];
+  const filteredCategories = Object.keys(categoryTotals).filter(category => categoryTotals[category] !== 0);
     
     const data={ 
-      labels: Object.keys(categoryTotals).filter(category => categoryTotals[category]!== 0),
+      labels:filteredCategories ,
       datasets: [
         {
+          label:'Dataset',
           data: dataValues, 
           backgroundColor: [
          'rgba(255, 99, 132, 0.6)',  // Rent
@@ -279,7 +294,7 @@ export class HomeComponent implements OnInit {
     }
     const ctx = this.barchart.nativeElement.getContext('2d');
     this.chartInstance=new Chart(ctx, {
-      type: 'pie',
+      type: this.selectedChart === 'pie' ? 'pie' :'bar' ,
       data:data,
       options: {
         responsive: true,
@@ -311,7 +326,7 @@ export class HomeComponent implements OnInit {
     return currentWeekData.reduce((acc: { [week: string]: number }, curr) => {
       const week = `Week ${currentWeekNumber}`;  // Group all data under the current week number
       acc[week] = (acc[week] || 0) + parseFloat(curr.amount) || 0;
-      console.log('acc: ', acc);
+      // console.log('acc: ', acc);
       return acc;
     }, {});
   }
@@ -352,11 +367,10 @@ export class HomeComponent implements OnInit {
       return acc + (parseFloat(curr.amount) || 0); // Sum the amounts, ensure valid number
     }, 0);
     // console.log('totalAmountThisYear: ', totalAmountThisYear);
-  
     return totalAmountThisYear; // Returns total amount for the current year
   }
   
-
+ 
   
   
 
