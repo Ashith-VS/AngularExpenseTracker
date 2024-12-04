@@ -183,7 +183,7 @@ export class HeaderComponent implements OnInit{
     if (this.newPassword && !pattern.test(this.newPassword)) {
       this.changePasswordError['newPassword'] = 'Password must be at least 8 characters, contain at least one uppercase letter, and include one special character';
     }
-  
+    
     // Check if new password matches confirmation password
     if (this.newPassword && this.confirmPassword && this.newPassword !== this.confirmPassword) {
       this.changePasswordError['confirmPassword'] = 'Passwords do not match';
