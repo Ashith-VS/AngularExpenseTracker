@@ -163,16 +163,16 @@ export class HomeComponent implements OnInit,AfterViewInit {
           }
         });
   
-        this.expenseData.forEach(expense => {
-          const date = new Date(expense.date);
-          if (date.getFullYear() === currentYear) {
-            const category = expense.category;
-            const amount = parseFloat(expense.amount);
-            if (category && !isNaN(amount)) {
-              filteredData[category] = (filteredData[category] || 0) - amount;
-            }
-          }
-        });
+        // this.expenseData.forEach(expense => {
+        //   const date = new Date(expense.date);
+        //   if (date.getFullYear() === currentYear) {
+        //     const category = expense.category;
+        //     const amount = parseFloat(expense.amount);
+        //     if (category && !isNaN(amount)) {
+        //       filteredData[category] = (filteredData[category] || 0) - amount;
+        //     }
+        //   }
+        // });
       }
   
       // Update the chart's data
@@ -266,7 +266,7 @@ export class HomeComponent implements OnInit,AfterViewInit {
       labels:filteredCategories ,
       datasets: [
         {
-          label:'Dataset',
+          label:'Data Available',
           data: dataValues, 
           backgroundColor: [
          'rgba(255, 99, 132, 0.6)',  // Rent
@@ -289,6 +289,8 @@ export class HomeComponent implements OnInit,AfterViewInit {
             'rgba(255, 159, 132, 1)'  // Other
           ],
           borderWidth: 1,
+          maxBarThickness: 100,
+          minBarLength: 100,
         },
       ],
     }
@@ -298,6 +300,8 @@ export class HomeComponent implements OnInit,AfterViewInit {
       data:data,
       options: {
         responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 2,
       },
     });
   }
